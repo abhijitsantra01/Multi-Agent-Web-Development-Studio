@@ -1,0 +1,8 @@
+# Gemini Deep Thinking Studio & Orchestrator Dependencies
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+google-genai>=0.1.1
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+langsmith>=0.1.0
+

@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemini 3.5 Flash Lite — Deep Thinking Chat & Artifact Studio</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Highlight.js for Syntax Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  
+  <!-- Marked.js for Markdown Parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <!-- App Styles -->
+  <link rel="stylesheet" href="/static/styles.css?v=5.1">
+</head>
+<body class="theme-dark width-comfortable font-md">
+  <div id="app" class="app-container">
+    
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand-logo">
+          <div class="logo-orb"></div>
+          <div class="logo-text">
+            <span class="logo-title">DeepThinking</span>
+            <span class="logo-badge">orchestrator</span>
+          </div>
+        </div>
+
+        <!-- Master & Lite Model Selector Pill with Fallback Chains -->
+        <!-- Master Architect & Lite Chat Model Selector Pill -->
+        <div class="model-status-pill" title="Selected Models: Master Architect / Lite Chat & Worker">
+          <span class="status-dot pulse" id="modelStatusDot"></span>
+          <select id="headerComplexModelSelect" class="header-model-dropdown" title="Select Architect / Master Model">
+            <option value="gemini-3.7-flash" selected>3.7 Flash</option>
+            <option value="gemini-3.6-flash">3.6 Flash</option>
+            <option value="gemini-4-hydrogen">4 Hydrogen</option>
+            <option value="gemini-3.8-flash">3.8 Flash</option>
+          </select>
+          <span class="model-divider">/</span>
+          <select id="headerLiteModelSelect" class="header-model-dropdown" title="Select Chat & Lite Worker Model">
+            <option value="gemini-3.1-flash-lite" selected>3.1 Flash Lite</option>
+            <option value="gemini-3.5-flash-lite">3.5 Flash Lite</option>
+            <option value="gemini-3.6-flash">3.6 Flash</option>
+          </select>
+        </div>
+
+        <!-- Projects Panel Toggle Switch Button -->
+        <button class="tool-btn btn-toggle-projects" id="btnToggleProjectsSidebar" title="Toggle Projects Sidebar Panel">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <line x1="9" y1="3" x2="9" y2="21"/>
+          </svg>
+          <span id="headerProjectsToggleText">Projects</span>
+          <span class="header-projects-pill" id="headerActiveProjectBadge" style="display:none;"></span>
+        </button>
+        <select id="projectSelect" style="display:none;"></select>
+
+      </div>
+
+      <div class="header-center">
+        <button class="tool-btn" id="btnToggleSplit" title="Toggle Split-Screen Reader & Sandbox Pane">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+          <span id="splitBtnText">Split View</span>
+        </button>
+      </div>
+
+      <div class="header-right">
+        <!-- Artifacts Drawer Toggle -->
+        <button class="icon-btn" id="btnArtifacts" title="View Saved Output Files">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <span class="badge" id="artifactCountBadge">0</span>
+        </button>
+
+        <!-- Configuration Settings Modal Toggle -->
+        <button class="icon-btn" id="btnSettings" title="Model & Thinking Settings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace (Dual Split-View capable) -->
+    <main class="app-main" id="mainContainer">
+      
+      <!-- Left Projects Sidebar Panel -->
+      <aside class="projects-sidebar" id="projectsSidebar">
+        <!-- Top Section: New Chat Button on Top of All -->
+        <div class="sidebar-top-section">
+          <button class="sidebar-new-chat-btn" id="btnNewChat" title="Reset Context to Blank Slate (/new)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>New Chat</span>
+          </button>
+        </div>
+
+        <!-- Search Project Option (Replaced from top header to sidebar directly under New Chat) -->
+        <div class="sidebar-search-section">
+          <div class="sidebar-search-box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="projectSearchInput" placeholder="Search projects..." />
+            <button class="sidebar-search-clear" id="btnClearProjectSearch" title="Clear search" style="display:none;">&times;</button>
+          </div>
+        </div>
+
+        <!-- Projects Header with Count -->
+        <div class="sidebar-projects-header">
+          <div class="sidebar-projects-title">
+            <span>PROJECTS</span>
+            <span class="projects-count-pill" id="projectsCountPill">0</span>
+          </div>
+          <button class="sidebar-icon-mini-btn" id="btnRefreshProjects" title="Refresh projects list">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          </button>
+        </div>
+
+        <!-- Scrollable Projects List: With scroll option but NO scroll button -->
+        <div class="projects-scroll-list" id="projectsList">
+          <!-- Dynamically populated via renderProjectsList() -->
+        </div>
+      </aside>
+
+      <!-- Primary Chat Stream Pane -->
+      <section class="chat-pane" id="chatPane">
+        
+        <!-- Welcome Screen (Shown when no messages) -->
+        <div class="welcome-screen" id="welcomeScreen">
+          <div class="welcome-glow"></div>
+          <div class="welcome-badge">⚡ Gemini Studio</div>
+          <h1 class="welcome-title">Massive Output & Code Studio</h1>
+          <p class="welcome-subtitle">
+            Generate and comfortably inspect immense outputs: full-scale landing pages, clean code, and interactive web apps.
+          </p>
+
+          <div class="preset-prompts-grid">
+            <button class="preset-card" data-prompt="Create a high-converting, state-of-the-art dark mode SaaS landing page for an AI agent platform called 'OmniAgent'. Include full CSS styling, hero section, bento grid, testimonials, and interactive pricing calculator in pure HTML5 and CSS.">
+              <div class="preset-icon">🚀</div>
+              <div class="preset-info">
+                <h4>Full SaaS Landing Page</h4>
+                <p>Pure HTML5 + Modern CSS, Bento Grid, Dark Glassmorphism</p>
+              </div>
+            </button>
+
+            <button class="preset-card" data-prompt="Build a complete luxury smartwatch landing page called 'Chronos Luxe' with high-contrast typography, interactive feature accordions, and pure CSS micro-animations.">
+              <div class="preset-icon">⌚</div>
+              <div class="preset-info">
+                <h4>Luxury Hardware Showcase</h4>
+                <p>Editorial aesthetics, titanium theme, crisp SVG icons</p>
+              </div>
+            </button>
+
+            <button class="preset-card" data-prompt="Perform a deep-dive architectural analysis of building a high-throughput multi-agent LLM orchestration system. Provide complete code implementations, sequence diagrams, and error fallback patterns.">
+              <div class="preset-icon">🧠</div>
+              <div class="preset-info">
+                <h4>Deep Architecture Blueprint</h4>
+                <p>Long-form breakdown with multi-file code structures</p>
+              </div>
+            </button>
+
+            <button class="preset-card" data-prompt="Design an interactive financial portfolio dashboard with dark glass cards, SVG charts, asset allocation tables, and clean animations.">
+              <div class="preset-icon">📊</div>
+              <div class="preset-info">
+                <h4>Crypto & Finance Dashboard</h4>
+                <p>Data tables, responsive grid, glowing analytics cards</p>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat Feed (hidden by default when welcome screen is shown) -->
+        <div class="chat-feed" id="chatFeed" style="display:none;"></div>
+
+        <!-- Composer Area -->
+        <footer class="composer-container">
+          <!-- Attachments Preview Bar -->
+          <div class="attachments-bar" id="attachmentsBar" style="display:none;"></div>
+
+          <!-- Quick Topic Pills -->
+          <div class="quick-pills-bar">
+            <span class="pills-title">Quick Actions:</span>
+            <button class="pill-btn" data-text="Add an interactive pricing tier switcher to the landing page">Pricing Switcher</button>
+            <button class="pill-btn" data-text="Enhance the hero section with modern glow animations and glassmorphic cards">Glow Hero</button>
+            <button class="pill-btn" data-text="Add an interactive FAQ accordion with smooth open/close transitions">FAQ Accordion</button>
+            <button class="pill-btn" data-text="Extract and format all CSS styles into a clean, modular structure">Modularize CSS</button>
+          </div>
+
+          <div class="composer-box" id="composerBox">
+            <div class="composer-input-row">
+              <button type="button" class="composer-attach-btn" id="btnAttachFile" title="Attach Image, Screenshot, or Code/Data file">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              </button>
+              <input type="file" id="fileInput" multiple accept="image/*,.html,.css,.js,.json,.csv,.txt,.py,.md" style="display:none;" />
+
+              <textarea 
+                id="promptInput" 
+                placeholder="Ask anything, attach designs/screenshots, or request complex multi-file apps... (Enter to send, Shift+Enter for new line)"
+                rows="1"
+              ></textarea>
+            </div>
+            
+            <div class="composer-actions">
+              <div class="composer-meta">
+                <span class="paste-hint-pill" title="Clipboard screenshots are automatically attached when you paste">📋 Ctrl+V to paste screenshot</span>
+                <span id="charCounter">0 chars</span>
+              </div>
+              <div class="composer-btn-group">
+                <button type="button" class="composer-key-btn" id="btnApiKey" title="Set Gemini API Key (Saved in .env)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="7.5" cy="15.5" r="4.5"/>
+                    <path d="m10.7 12.3 8.3-8.3"/>
+                    <path d="m15.5 7.5 2 2"/>
+                    <path d="m13.5 9.5 2 2"/>
+                  </svg>
+                  <span>API Key</span>
+                  <span class="key-status-indicator" id="keyStatusIndicator"></span>
+                </button>
+                <button type="button" class="composer-modifier-toggle" id="btnComposerModToggle" title="Toggle Modifier Agent for safe incremental edits">
+                  <span>🔧 Modifier: OFF</span>
+                </button>
+                <button type="button" class="composer-chat-pill" id="btnComposerChatOnlyBadge" style="display:none;" title="Chat Only Mode is active - click to configure in Settings">
+                  <span class="chat-pill-dot"></span>
+                  <span id="composerChatPillText">💬 Chat Only</span>
+                </button>
+                <button type="button" id="btnForceStop" class="stop-btn" style="display:none;" title="Force Stop Execution (Escape)">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>
+                  <span>Force Stop</span>
+                </button>
+                <button id="btnSend" class="send-btn" title="Send message (Enter)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  <span id="sendBtnLabel">Generate</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="composer-footer-note">
+            <span>Projects versioned in <code>output/projects/</code></span>
+          </div>
+
+        </footer>
+      </section>
+
+      <!-- Secondary Split-Screen Reader & Sandbox Pane -->
+      <aside class="reader-pane" id="readerPane">
+        <div class="reader-header">
+          <div class="reader-tabs">
+            <button class="tab-btn active" data-tab="readerView" id="tabDocReader" title="Document Reader">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              <span>Reader</span>
+            </button>
+            <button class="tab-btn" data-tab="previewView" id="tabSandbox" title="Live Preview">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+              <span>Preview</span>
+            </button>
+            <button class="tab-btn" data-tab="codeView" id="tabCode" title="Code Inspector">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              <span>Code</span>
+            </button>
+          </div>
+
+          <div class="reader-actions">
+            <!-- Sandbox Project Badge -->
+            <div class="sandbox-project-badge" id="sandboxProjectBadge" style="display:none;" title="Currently previewed project">
+              <span>pr-1</span>
+            </div>
+
+            <!-- Review Action Bar (Like / Dislike Baseline Flow) -->
+            <div class="review-action-group" id="reviewActionGroup" style="display:none;" title="Review Staged Version">
+              <span class="staged-pill" id="stagedBadge">Staged</span>
+              <button class="review-btn btn-like" id="btnLikeVersion" title="Like: Accept and promote this design to .backup/ baseline">
+                👍 Accept
+              </button>
+              <button class="review-btn btn-dislike" id="btnDislikeVersion" title="Dislike: Revert back to previous accepted baseline">
+                👎 Revert
+              </button>
+            </div>
+
+            <button class="tool-btn btn-trigger-modifier" id="btnTriggerModifier" title="Upgrade this project on top of baseline" style="display:none;">
+              <span>🔧 Upgrade</span>
+            </button>
+
+            <!-- Sandbox Device Switcher -->
+            <div class="viewport-switcher" id="viewportSwitcher" style="display:none;">
+              <button class="vp-btn active" data-width="100%" title="Desktop View">🖥️</button>
+              <button class="vp-btn" data-width="768px" title="Tablet View (768px)">📱</button>
+              <button class="vp-btn" data-width="375px" title="Mobile View (375px)">📲</button>
+              <button class="vp-btn" id="btnReloadPreview" title="Reload Sandbox">🔄</button>
+            </div>
+
+            <!-- Fullscreen Output Pane Toggle (Icon Only) -->
+            <button class="tool-btn btn-fullscreen-pane icon-only" id="btnFullscreenPane" title="Toggle Fullscreen Output">
+              <svg class="fs-icon-expand" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+              </svg>
+              <svg class="fs-icon-collapse" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+                <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+              </svg>
+            </button>
+
+            <!-- Close Split Pane -->
+            <button class="close-pane-btn" id="btnCloseSplit" title="Close Reader Pane">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="reader-body">
+          <!-- 1. Dedicated Document Reader View -->
+          <div class="tab-content active" id="readerView">
+            <div class="doc-layout">
+              <!-- Sticky Table of Contents -->
+              <nav class="doc-toc" id="docToc">
+                <div class="toc-header">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                  <span>TABLE OF CONTENTS</span>
+                </div>
+                <div class="toc-links" id="tocLinks">
+                  <span class="toc-empty">No headings in document yet</span>
+                </div>
+              </nav>
+
+              <!-- Main Document Prose -->
+              <div class="doc-prose-container">
+                <div class="doc-meta-bar">
+                  <span id="docWordCount">0 words</span>
+                  <span class="meta-dot">•</span>
+                  <span id="docCharCount">0 characters</span>
+                  <div class="doc-meta-actions">
+                    <button class="meta-btn" id="btnCopyDoc" title="Copy full text">📋 Copy Text</button>
+                  </div>
+                </div>
+                <article class="doc-prose markdown-body" id="docProse">
+                  <div class="empty-state">
+                    Select any message or generate an output to read it here with optimal typography and sticky navigation.
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Live Interactive Sandbox Preview View -->
+          <div class="tab-content" id="previewView">
+            <div class="preview-stage" id="previewStage">
+              <iframe id="previewIframe" sandbox="allow-scripts allow-modals allow-same-origin" title="Live Preview Sandbox"></iframe>
+            </div>
+          </div>
+
+          <!-- 3. Code Inspector View -->
+          <div class="tab-content" id="codeView">
+            <div class="code-inspector">
+              <div class="code-inspector-header">
+                <div class="code-file-picker" id="codeFilePicker">
+                  <button class="file-chip active" data-file="html">index.html</button>
+                  <button class="file-chip" data-file="css">styles.css</button>
+                </div>
+                <div class="code-actions">
+                  <button class="meta-btn" id="btnCopyInspectedCode">📋 Copy Code</button>
+                </div>
+              </div>
+              <pre class="code-inspector-pre"><code id="codeInspectorContent" class="language-html"></code></pre>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+    </main>
+
+    <!-- Slide-over Artifacts Drawer -->
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <aside class="artifacts-drawer" id="artifactsDrawer">
+      <div class="drawer-header">
+        <div class="drawer-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <h3>Generated Artifacts</h3>
+        </div>
+        <button class="icon-btn-close" id="btnCloseDrawer">✕</button>
+      </div>
+      <div class="drawer-dir-info">
+        <span>Target Folder:</span>
+        <code id="drawerDirPath">output/</code>
+      </div>
+      <div class="drawer-body" id="drawerList">
+        <div class="drawer-loading">Loading saved files...</div>
+      </div>
+    </aside>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+      <div class="modal-card modal-settings-dialog">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="settings-modal-icon">⚙️</div>
+            <div>
+              <h3 style="margin:0; font-size:1.1rem; color:#fff;">Settings & Pipelines</h3>
+              <p style="margin:2px 0 0; font-size:0.75rem; color:#64748b;">Configure landing page generation studio or isolated Chat-Only pipeline</p>
+            </div>
+          </div>
+          <button class="modal-close" id="btnCloseSettings">✕</button>
+        </div>
+
+        <!-- Settings Sub-Navigation Tabs -->
+        <div class="settings-tabs-nav">
+          <button type="button" class="settings-tab-btn active" id="tabSettingsStudio" data-target="panelSettingsStudio">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            <span>Landing Page Studio</span>
+          </button>
+          <button type="button" class="settings-tab-btn" id="tabSettingsChat" data-target="panelSettingsChat">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>Chat Only Pipeline</span>
+            <span class="chat-tab-status-pill" id="chatTabStatusPill">OFF</span>
+          </button>
+          <button type="button" class="settings-tab-btn" id="tabSettingsObservability" data-target="panelSettingsObservability">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>Observability (LangSmith)</span>
+            <span class="chat-tab-status-pill" id="observabilityTabStatusPill">OFF</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Panel 1: Studio Generation Flow -->
+          <div class="settings-panel active" id="panelSettingsStudio">
+            <div class="form-group">
+              <label for="cfgComplexModel">
+                <span>Master Architect Model</span>
+              </label>
+              <select id="cfgComplexModel" class="form-select">
+                <option value="gemini-3.7-flash" selected>3.7 Flash (Fast & Powerful)</option>
+                <option value="gemini-3.6-flash">3.6 Flash</option>
+                <option value="gemini-4-hydrogen">4 Hydrogen (Deep Reasoning)</option>
+                <option value="gemini-3.8-flash">3.8 Flash</option>
+              </select>
+              <p class="form-hint">Used for blueprint synthesis, master assembly, and multi-file upgrades.</p>
+            </div>
+
+            <div class="form-group">
+              <label for="cfgLiteModel">
+                <span>Chat & Lite Worker Model</span>
+              </label>
+              <select id="cfgLiteModel" class="form-select">
+                <option value="gemini-3.1-flash-lite" selected>3.1 Flash Lite (Ultra Fast 0.5s)</option>
+                <option value="gemini-3.5-flash-lite">3.5 Flash Lite</option>
+                <option value="gemini-3.6-flash">3.6 Flash</option>
+              </select>
+              <p class="form-hint">Used for general chat, understanding project details, localized edits, and quick tasks.</p>
+            </div>
+
+            <div class="form-group">
+              <label for="cfgBudget">
+                <span>Thinking Budget (Reasoning Tokens)</span>
+                <strong id="cfgBudgetValue">1,024</strong>
+              </label>
+              <input type="range" id="cfgBudget" min="0" max="8192" step="512" value="1024" />
+              <p class="form-hint">Reasoning token budget for planning & cohesive assembly (0 = instant, 1,024 = balanced sweet spot, 2,048+ = deep reasoning).</p>
+            </div>
+
+            <div class="form-group">
+              <label for="cfgTemp">
+                <span>Temperature</span>
+                <strong id="cfgTempValue">1.00</strong>
+              </label>
+              <input type="range" id="cfgTemp" min="0.0" max="2.0" step="0.05" value="1.0" />
+              <p class="form-hint">Controls creative flair (0.7 = structured/precise, 1.0 = balanced, 1.3+ = highly creative).</p>
+            </div>
+          </div>
+
+          <!-- Panel 2: Dedicated Chat-Only Pipeline -->
+          <div class="settings-panel" id="panelSettingsChat" style="display:none;">
+            <!-- Chat Only Pill Toggle Banner -->
+            <div class="chat-only-banner">
+              <div class="chat-only-banner-info">
+                <h4>Standalone Chat Pipeline</h4>
+                <p>Bypasses multi-agent decomposition. Uses a single model for fast chatting, learning, and HTML code generation with output streaming to Reader and Sandbox.</p>
+              </div>
+              <div class="chat-only-toggle-wrapper">
+                <button type="button" class="pill-toggle-btn" id="btnChatOnlyPillToggle" title="Toggle Chat-Only mode">
+                  <span class="pill-toggle-track">
+                    <span class="pill-toggle-thumb"></span>
+                  </span>
+                  <span class="pill-toggle-label" id="pillToggleLabel">
+                    <span class="pill-label-title">Chat Only</span>
+                    <span class="pill-state-tag off">OFF</span>
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <div class="chat-controls-section" id="chatControlsSubpanel">
+              <div class="form-group">
+                <label for="cfgChatOnlyModel">
+                  <span>Chat Model</span>
+                </label>
+                <select id="cfgChatOnlyModel" class="form-select">
+                  <option value="gemini-3.1-flash-lite" selected>Gemini 3.1 Flash Lite (Recommended - Ultra Fast 0.5s)</option>
+                  <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite</option>
+                  <option value="gemini-3.7-flash">Gemini 3.7 Flash</option>
+                  <option value="gemini-3.6-flash">Gemini 3.6 Flash</option>
+                </select>
+                <p class="form-hint">Direct single-model for answering questions, learning, and producing HTML components.</p>
+              </div>
+
+              <div class="form-group">
+                <label for="cfgChatOnlyBudget">
+                  <span>Thinking Budget (Reasoning Tokens)</span>
+                  <strong id="cfgChatBudgetValue">0 (Instant)</strong>
+                </label>
+                <input type="range" id="cfgChatOnlyBudget" min="0" max="32768" step="1024" value="0" />
+                <p class="form-hint">Set to 0 for instant responses without reasoning latency. Increase if complex problem solving is desired.</p>
+              </div>
+
+              <div class="form-group">
+                <label for="cfgChatOnlyTemp">
+                  <span>Temperature</span>
+                  <strong id="cfgChatTempValue">0.70</strong>
+                </label>
+                <input type="range" id="cfgChatOnlyTemp" min="0.0" max="2.0" step="0.05" value="0.70" />
+                <p class="form-hint">Controls precision vs creativity (0.2 = deterministic/coding, 0.7 = balanced QA, 1.2+ = creative).</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel 3: LangSmith Observability & Agent Tracing -->
+          <div class="settings-panel" id="panelSettingsObservability" style="display:none;">
+            <div class="chat-only-banner">
+              <div>
+                <div style="font-weight:700; font-size:0.95rem; color:#fff; display:flex; align-items:center; gap:0.5rem;">
+                  <span>🔭 LangSmith Multi-Agent Tracing</span>
+                  <span class="chat-tab-status-pill" id="observabilityLiveStatus">INACTIVE</span>
+                </div>
+                <p style="margin:4px 0 0; font-size:0.78rem; color:#94a3b8; line-height:1.4;">
+                  Trace multi-agent execution flows, subtask component workers, intent triage, vision analysis, master assembly, token budgets, and LLM fallbacks.
+                </p>
+              </div>
+              <label class="toggle-switch" style="position:relative; display:inline-block; width:44px; height:24px;">
+                <input type="checkbox" id="cfgLangSmithEnabled">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label for="cfgLangSmithApiKey">
+                <span>LangSmith API Key</span>
+                <span style="font-size:0.75rem; color:#64748b;">(from smith.langchain.com)</span>
+              </label>
+              <div style="display:flex; gap:0.5rem;">
+                <input type="password" id="cfgLangSmithApiKey" class="form-input" placeholder="lsv2_pt_... or paste your key" style="flex:1;" />
+                <button type="button" class="icon-btn" id="btnToggleLangSmithKey" title="Show/Hide Key" style="padding:0.4rem 0.6rem;">👁️</button>
+              </div>
+              <p class="form-hint" id="cfgLangSmithKeyHint">Leave empty to keep existing key from .env.</p>
+            </div>
+
+            <div class="form-group">
+              <label for="cfgLangSmithProject">
+                <span>LangSmith Project Name</span>
+              </label>
+              <input type="text" id="cfgLangSmithProject" class="form-input" value="gemini-orchestration-studio" placeholder="gemini-orchestration-studio" />
+              <p class="form-hint">Traces will be organized under this project in your LangSmith dashboard.</p>
+            </div>
+
+            <div class="form-group">
+              <label for="cfgLangSmithEndpoint">
+                <span>LangSmith Endpoint</span>
+              </label>
+              <input type="text" id="cfgLangSmithEndpoint" class="form-input" value="https://api.smith.langchain.com" />
+            </div>
+
+            <div style="display:flex; gap:0.75rem;">
+              <div class="form-group" style="flex:1;">
+                <label for="cfgLangSmithAgentId">
+                  <span>Agent ID</span>
+                </label>
+                <input type="text" id="cfgLangSmithAgentId" class="form-input" value="agentic-orchestration" />
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label for="cfgLangSmithAgentEnv">
+                  <span>Environment</span>
+                </label>
+                <input type="text" id="cfgLangSmithAgentEnv" class="form-input" value="local" />
+              </div>
+            </div>
+
+            <div style="margin-top:1rem; padding:0.75rem 1rem; border-radius:8px; background:rgba(30, 41, 59, 0.5); border:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:space-between;">
+              <div style="font-size:0.78rem; color:#94a3b8;">
+                <span>Observed Agents: </span>
+                <strong id="langSmithTracedAgentsCount" style="color:#cbd5e1;">Intent Router, Vision, Workers, Assembler, Chat</strong>
+              </div>
+              <a href="https://smith.langchain.com" target="_blank" rel="noopener noreferrer" class="meta-btn" id="linkLangSmithDashboard" style="text-decoration:none; display:inline-flex; align-items:center; gap:4px; font-size:0.75rem; padding:4px 8px;">
+                <span>Open Dashboard</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-reset-settings" id="btnResetSettings" title="Reset all model, temperature, and budget controls to defaults">Reset Defaults</button>
+          <button class="secondary-btn" id="btnCancelSettings">Cancel</button>
+          <button class="primary-btn" id="btnSaveSettings">Save & Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gemini API Key Manager Modal -->
+    <div class="modal-overlay" id="apiKeyModal" style="display:none;">
+      <div class="modal-card key-modal-dialog">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="key-modal-icon">🔑</div>
+            <div>
+              <h3 style="margin:0; font-size:1.1rem; color:#fff;">Gemini API Key</h3>
+              <p style="margin:2px 0 0; font-size:0.75rem; color:#64748b;">User key has highest priority — Default .env key is preserved</p>
+            </div>
+          </div>
+          <button class="modal-close" id="btnCloseApiKeyModal">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="current-key-banner" id="currentKeyBanner">
+            <span class="key-banner-label">Active Key:</span>
+            <code id="activeKeyDisplay">Loading...</code>
+            <span class="key-active-badge" id="keyBadgeText">✓ Active</span>
+            <span class="key-source-badge" id="keySourceBadge" style="font-size:0.72rem; color:#94a3b8; font-family:var(--font-mono);">(Source: .env)</span>
+          </div>
+          
+          <div class="form-group" style="margin-top: 1.25rem;">
+            <label for="apiKeyInput" style="display:block; margin-bottom: 0.4rem; font-size: 0.85rem; color:#f1f5f9; font-weight:600;">
+              Paste User API Key (Overrides .env)
+            </label>
+            <div class="key-input-wrapper">
+              <input type="password" id="apiKeyInput" class="form-select key-input" placeholder="Paste AIzaSy... or AQ.Ab8RN..." autocomplete="off" />
+              <button type="button" class="key-toggle-vis" id="btnToggleKeyVis" title="Show/Hide Key">👁️</button>
+              <button type="button" class="key-paste-btn" id="btnPasteClipboardKey" title="Paste from clipboard">📋 Paste</button>
+            </div>
+            <p class="form-hint" style="margin-top: 0.4rem;">
+              When set, user key takes immediate priority for generation. The default key in <code>.env</code> is kept as fallback.
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="secondary-btn" id="btnCancelApiKey">Cancel</button>
+          <button class="secondary-btn" id="btnResetApiKey" style="color:#f87171; border-color:rgba(239,68,68,0.3); display:none;" title="Clear user key and revert to default .env key">Reset to .env Default</button>
+          <button class="primary-btn" id="btnSaveApiKey">
+            <span>Save & Apply Key</span>
+          </button>
+        </div>
+      </div>
+    <!-- Fullscreen Code Inspection Modal -->
+    <div class="modal-overlay" id="codeModal">
+      <div class="modal-card modal-large">
+        <div class="modal-header">
+          <h3 id="codeModalTitle">Code Inspector</h3>
+          <div class="modal-header-actions">
+            <button class="meta-btn" id="btnCopyModalCode">📋 Copy Code</button>
+            <button class="modal-close" id="btnCloseCodeModal">✕</button>
+          </div>
+        </div>
+        <div class="modal-body code-modal-body">
+          <pre><code id="codeModalContent"></code></pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- App Script -->
+  <script src="/static/app.js?v=5.2"></script>
+</body>
+</html>
